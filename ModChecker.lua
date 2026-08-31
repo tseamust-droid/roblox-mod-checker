@@ -1,5 +1,8 @@
 --========================================================
 -- SEAMUSJUKES MOD CHECKER
+-- MOBILE + PC
+-- EVERYONE CAN USE IT
+-- ONE CHEATER NOTIFICATION PER PLAYER
 --========================================================
 
 local Players = game:GetService("Players")
@@ -8,14 +11,11 @@ local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
 --========================================================
--- ADMIN ID
+-- DEVICE DETECTION
 --========================================================
 
-local ADMIN_USER_ID = 11593044992
-
-if LocalPlayer.UserId ~= ADMIN_USER_ID then
-	return
-end
+local isMobile = UserInputService.TouchEnabled
+	and not UserInputService.KeyboardEnabled
 
 --========================================================
 -- GUI
@@ -24,6 +24,7 @@ end
 local gui = Instance.new("ScreenGui")
 gui.Name = "SeamusJukesModChecker"
 gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
 gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 --========================================================
@@ -31,13 +32,11 @@ gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 --========================================================
 
 local function makeDraggable(frame)
-
 	local dragging = false
 	local dragStart
 	local startPosition
 
 	frame.InputBegan:Connect(function(input)
-
 		if input.UserInputType == Enum.UserInputType.MouseButton1
 			or input.UserInputType == Enum.UserInputType.Touch then
 
@@ -46,17 +45,14 @@ local function makeDraggable(frame)
 			startPosition = frame.Position
 
 			input.Changed:Connect(function()
-
 				if input.UserInputState == Enum.UserInputState.End then
 					dragging = false
 				end
-
 			end)
 		end
 	end)
 
 	UserInputService.InputChanged:Connect(function(input)
-
 		if not dragging then
 			return
 		end
@@ -72,32 +68,9 @@ local function makeDraggable(frame)
 				startPosition.Y.Scale,
 				startPosition.Y.Offset + delta.Y
 			)
-
 		end
 	end)
 end
-
---========================================================
--- OPEN BUTTON
---========================================================
-
-local openButton = Instance.new("TextButton")
-openButton.Name = "OpenButton"
-openButton.Size = UDim2.new(0, 180, 0, 50)
-openButton.Position = UDim2.new(0, 20, 0.5, -25)
-openButton.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
-openButton.Text = "MOD CHECKER"
-openButton.TextColor3 = Color3.new(1, 1, 1)
-openButton.TextSize = 16
-openButton.Font = Enum.Font.GothamBold
-openButton.Visible = false
-openButton.Active = true
-openButton.Parent = gui
-
-Instance.new("UICorner", openButton).CornerRadius =
-	UDim.new(0, 10)
-
-makeDraggable(openButton)
 
 --========================================================
 -- MAIN WINDOW
@@ -105,49 +78,93 @@ makeDraggable(openButton)
 
 local main = Instance.new("Frame")
 main.Name = "Main"
-main.Size = UDim2.new(0, 760, 0, 520)
-main.Position = UDim2.new(0.5, -380, 0.5, -260)
+
+if isMobile then
+	main.Size = UDim2.new(0.94, 0, 0.82, 0)
+	main.Position = UDim2.new(0.03, 0, 0.09, 0)
+else
+	main.Size = UDim2.new(0, 760, 0, 520)
+	main.Position = UDim2.new(0.5, -380, 0.5, -260)
+end
+
 main.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
 main.BorderSizePixel = 0
 main.Active = true
 main.Parent = gui
 
-Instance.new("UICorner", main).CornerRadius =
-	UDim.new(0, 12)
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 12)
+mainCorner.Parent = main
 
 makeDraggable(main)
+
+--========================================================
+-- OPEN BUTTON
+--========================================================
+
+local openButton = Instance.new("TextButton")
+openButton.Name = "OpenButton"
+
+if isMobile then
+	openButton.Size = UDim2.new(0, 140, 0, 45)
+else
+	openButton.Size = UDim2.new(0, 180, 0, 50)
+end
+
+openButton.Position = UDim2.new(0, 15, 0.5, -25)
+openButton.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+openButton.Text = "MOD CHECKER"
+openButton.TextColor3 = Color3.new(1, 1, 1)
+openButton.TextSize = isMobile and 13 or 16
+openButton.Font = Enum.Font.GothamBold
+openButton.Visible = false
+openButton.Active = true
+openButton.Parent = gui
+
+local openCorner = Instance.new("UICorner")
+openCorner.CornerRadius = UDim.new(0, 10)
+openCorner.Parent = openButton
+
+makeDraggable(openButton)
 
 --========================================================
 -- TITLE
 --========================================================
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -70, 0, 60)
-title.Position = UDim2.new(0, 20, 0, 0)
+title.Size = UDim2.new(1, -70, 0, isMobile and 45 or 60)
+title.Position = UDim2.new(0, isMobile and 12 or 20, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "SeamusJukes Mod Checker"
 title.TextColor3 = Color3.new(1, 1, 1)
-title.TextSize = 24
+title.TextSize = isMobile and 17 or 24
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = main
 
 --========================================================
--- CLOSE
+-- CLOSE BUTTON
 --========================================================
 
 local close = Instance.new("TextButton")
-close.Size = UDim2.new(0, 42, 0, 42)
-close.Position = UDim2.new(1, -52, 0, 9)
+close.Size = isMobile
+	and UDim2.new(0, 34, 0, 34)
+	or UDim2.new(0, 42, 0, 42)
+
+close.Position = isMobile
+	and UDim2.new(1, -42, 0, 6)
+	or UDim2.new(1, -52, 0, 9)
+
 close.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
 close.Text = "X"
 close.TextColor3 = Color3.new(1, 1, 1)
-close.TextSize = 20
+close.TextSize = isMobile and 15 or 20
 close.Font = Enum.Font.GothamBold
 close.Parent = main
 
-Instance.new("UICorner", close).CornerRadius =
-	UDim.new(0, 8)
+local closeCorner = Instance.new("UICorner")
+closeCorner.CornerRadius = UDim.new(0, 8)
+closeCorner.Parent = close
 
 close.MouseButton1Click:Connect(function()
 	main.Visible = false
@@ -160,48 +177,72 @@ openButton.MouseButton1Click:Connect(function()
 end)
 
 --========================================================
--- PLAYER LIST
+-- PLAYER LIST PANEL
 --========================================================
 
 local listBackground = Instance.new("Frame")
 listBackground.Name = "PlayerListBackground"
-listBackground.Position = UDim2.new(0, 15, 0, 75)
-listBackground.Size = UDim2.new(0, 350, 1, -90)
+
+if isMobile then
+	listBackground.Position = UDim2.new(0, 8, 0, 55)
+	listBackground.Size = UDim2.new(0.45, -10, 1, -63)
+else
+	listBackground.Position = UDim2.new(0, 15, 0, 75)
+	listBackground.Size = UDim2.new(0, 350, 1, -90)
+end
+
 listBackground.BackgroundColor3 = Color3.fromRGB(27, 27, 36)
 listBackground.BorderSizePixel = 0
 listBackground.Parent = main
 
-Instance.new("UICorner", listBackground).CornerRadius =
-	UDim.new(0, 8)
+local listCorner = Instance.new("UICorner")
+listCorner.CornerRadius = UDim.new(0, 8)
+listCorner.Parent = listBackground
 
--- Player list title
+--========================================================
+-- PLAYER LIST TITLE
+--========================================================
 
 local listTitle = Instance.new("TextLabel")
-listTitle.Size = UDim2.new(1, -20, 0, 40)
-listTitle.Position = UDim2.new(0, 10, 0, 5)
+listTitle.Size = UDim2.new(1, -12, 0, isMobile and 32 or 40)
+listTitle.Position = UDim2.new(0, 7, 0, 3)
 listTitle.BackgroundTransparency = 1
 listTitle.Text = "PLAYERS"
 listTitle.TextColor3 = Color3.fromRGB(200, 200, 210)
-listTitle.TextSize = 16
+listTitle.TextSize = isMobile and 12 or 16
 listTitle.Font = Enum.Font.GothamBold
 listTitle.TextXAlignment = Enum.TextXAlignment.Left
 listTitle.Parent = listBackground
 
--- Scrolling frame
+--========================================================
+-- PLAYER SCROLLING LIST
+--========================================================
 
 local playerList = Instance.new("ScrollingFrame")
 playerList.Name = "PlayerList"
-playerList.Position = UDim2.new(0, 10, 0, 45)
-playerList.Size = UDim2.new(1, -20, 1, -55)
+playerList.Position = UDim2.new(
+	0,
+	6,
+	0,
+	isMobile and 36 or 45
+)
+
+playerList.Size = UDim2.new(
+	1,
+	-12,
+	1,
+	isMobile and -42 or -55
+)
+
 playerList.BackgroundTransparency = 1
 playerList.BorderSizePixel = 0
-playerList.ScrollBarThickness = 6
+playerList.ScrollBarThickness = isMobile and 4 or 6
 playerList.CanvasSize = UDim2.new(0, 0, 0, 0)
 playerList.AutomaticCanvasSize = Enum.AutomaticSize.Y
 playerList.Parent = listBackground
 
 local playerLayout = Instance.new("UIListLayout")
-playerLayout.Padding = UDim.new(0, 6)
+playerLayout.Padding = UDim.new(0, isMobile and 4 or 6)
 playerLayout.SortOrder = Enum.SortOrder.Name
 playerLayout.Parent = playerList
 
@@ -211,55 +252,128 @@ playerLayout.Parent = playerList
 
 local info = Instance.new("Frame")
 info.Name = "PlayerInfo"
-info.Position = UDim2.new(0, 380, 0, 75)
-info.Size = UDim2.new(0, 365, 1, -90)
+
+if isMobile then
+	info.Position = UDim2.new(0.55, 2, 0, 55)
+	info.Size = UDim2.new(0.45, -10, 1, -63)
+else
+	info.Position = UDim2.new(0, 380, 0, 75)
+	info.Size = UDim2.new(0, 365, 1, -90)
+end
+
 info.BackgroundColor3 = Color3.fromRGB(27, 27, 36)
 info.BorderSizePixel = 0
 info.Parent = main
 
-Instance.new("UICorner", info).CornerRadius =
-	UDim.new(0, 8)
+local infoCorner = Instance.new("UICorner")
+infoCorner.CornerRadius = UDim.new(0, 8)
+infoCorner.Parent = info
+
+--========================================================
+-- SELECTED PLAYER
+--========================================================
 
 local selectedName = Instance.new("TextLabel")
-selectedName.Position = UDim2.new(0, 20, 0, 20)
-selectedName.Size = UDim2.new(1, -40, 0, 45)
+selectedName.Position = UDim2.new(
+	0,
+	isMobile and 10 or 20,
+	0,
+	isMobile and 12 or 20
+)
+
+selectedName.Size = UDim2.new(
+	1,
+	isMobile and -20 or -40,
+	0,
+	isMobile and 35 or 45
+)
+
 selectedName.BackgroundTransparency = 1
 selectedName.Text = "Select a player"
 selectedName.TextColor3 = Color3.new(1, 1, 1)
-selectedName.TextSize = 22
+selectedName.TextSize = isMobile and 15 or 22
 selectedName.Font = Enum.Font.GothamBold
 selectedName.TextXAlignment = Enum.TextXAlignment.Left
+selectedName.TextTruncate = Enum.TextTruncate.AtEnd
 selectedName.Parent = info
 
+--========================================================
+-- STATUS
+--========================================================
+
 local status = Instance.new("TextLabel")
-status.Position = UDim2.new(0, 20, 0, 75)
-status.Size = UDim2.new(1, -40, 0, 35)
+status.Position = UDim2.new(
+	0,
+	isMobile and 10 or 20,
+	0,
+	isMobile and 55 or 75
+)
+
+status.Size = UDim2.new(
+	1,
+	isMobile and -20 or -40,
+	0,
+	30
+)
+
 status.BackgroundTransparency = 1
 status.Text = "Status: Normal"
 status.TextColor3 = Color3.fromRGB(90, 255, 120)
-status.TextSize = 17
+status.TextSize = isMobile and 12 or 17
 status.Font = Enum.Font.Gotham
 status.TextXAlignment = Enum.TextXAlignment.Left
 status.Parent = info
 
+--========================================================
+-- VIOLATIONS
+--========================================================
+
 local violationText = Instance.new("TextLabel")
-violationText.Position = UDim2.new(0, 20, 0, 120)
-violationText.Size = UDim2.new(1, -40, 0, 35)
+violationText.Position = UDim2.new(
+	0,
+	isMobile and 10 or 20,
+	0,
+	isMobile and 90 or 120
+)
+
+violationText.Size = UDim2.new(
+	1,
+	isMobile and -20 or -40,
+	0,
+	30
+)
+
 violationText.BackgroundTransparency = 1
 violationText.Text = "Violations: 0"
 violationText.TextColor3 = Color3.fromRGB(220, 220, 220)
-violationText.TextSize = 17
+violationText.TextSize = isMobile and 12 or 17
 violationText.Font = Enum.Font.Gotham
 violationText.TextXAlignment = Enum.TextXAlignment.Left
 violationText.Parent = info
 
+--========================================================
+-- REASON
+--========================================================
+
 local reasonText = Instance.new("TextLabel")
-reasonText.Position = UDim2.new(0, 20, 0, 170)
-reasonText.Size = UDim2.new(1, -40, 0, 100)
+reasonText.Position = UDim2.new(
+	0,
+	isMobile and 10 or 20,
+	0,
+	isMobile and 125 or 170
+)
+
+reasonText.Size = UDim2.new(
+	1,
+	isMobile and -20 or -40,
+	0,
+	isMobile and 90 or 100
+)
+
 reasonText.BackgroundTransparency = 1
 reasonText.Text = "Detected violation: None"
 reasonText.TextColor3 = Color3.fromRGB(255, 190, 70)
-reasonText.TextSize = 17
+reasonText.TextSize = isMobile and 11 or 17
 reasonText.Font = Enum.Font.Gotham
 reasonText.TextWrapped = true
 reasonText.TextXAlignment = Enum.TextXAlignment.Left
@@ -271,17 +385,31 @@ reasonText.Parent = info
 --========================================================
 
 local report = Instance.new("TextButton")
-report.Position = UDim2.new(0, 20, 1, -65)
-report.Size = UDim2.new(1, -40, 0, 45)
+
+report.Position = UDim2.new(
+	0,
+	isMobile and 10 or 20,
+	1,
+	isMobile and -52 or -65
+)
+
+report.Size = UDim2.new(
+	1,
+	isMobile and -20 or -40,
+	0,
+	isMobile and 38 or 45
+)
+
 report.BackgroundColor3 = Color3.fromRGB(190, 65, 65)
 report.Text = "REPORT PLAYER"
 report.TextColor3 = Color3.new(1, 1, 1)
-report.TextSize = 16
+report.TextSize = isMobile and 11 or 16
 report.Font = Enum.Font.GothamBold
 report.Parent = info
 
-Instance.new("UICorner", report).CornerRadius =
-	UDim.new(0, 8)
+local reportCorner = Instance.new("UICorner")
+reportCorner.CornerRadius = UDim.new(0, 8)
+reportCorner.Parent = report
 
 --========================================================
 -- PLAYER DATA
@@ -290,6 +418,73 @@ Instance.new("UICorner", report).CornerRadius =
 local playerData = {}
 local selectedPlayer = nil
 local playerButtons = {}
+
+--========================================================
+-- NOTIFICATIONS
+--========================================================
+
+local notificationHolder = Instance.new("Frame")
+notificationHolder.Name = "Notifications"
+
+if isMobile then
+	notificationHolder.Size = UDim2.new(0.55, -15, 0, 250)
+	notificationHolder.Position = UDim2.new(0.45, 5, 0, 10)
+else
+	notificationHolder.Size = UDim2.new(0, 300, 0, 300)
+	notificationHolder.Position = UDim2.new(1, -315, 0, 20)
+end
+
+notificationHolder.BackgroundTransparency = 1
+notificationHolder.Parent = gui
+
+local notificationLayout = Instance.new("UIListLayout")
+notificationLayout.SortOrder = Enum.SortOrder.LayoutOrder
+notificationLayout.Padding = UDim.new(0, 8)
+notificationLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+notificationLayout.Parent = notificationHolder
+
+local notifiedPlayers = {}
+
+local function showCheaterNotification(plr)
+
+	-- Only notify once per player
+	if notifiedPlayers[plr] then
+		return
+	end
+
+	notifiedPlayers[plr] = true
+
+	local notification = Instance.new("TextLabel")
+	notification.Name = "CheaterNotification"
+	notification.Size = UDim2.new(1, 0, 0, isMobile and 42 or 50)
+	notification.BackgroundColor3 = Color3.fromRGB(190, 55, 55)
+	notification.BackgroundTransparency = 0.05
+	notification.TextColor3 = Color3.new(1, 1, 1)
+
+	notification.Text =
+		plr.DisplayName .. " Is Cheating"
+
+	notification.TextSize =
+		isMobile and 12 or 16
+
+	notification.Font = Enum.Font.GothamBold
+	notification.TextWrapped = true
+	notification.Parent = notificationHolder
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 8)
+	corner.Parent = notification
+
+	task.delay(4, function()
+		if notification and notification.Parent then
+			notification:Destroy()
+		end
+	end)
+end
+
+--========================================================
+-- SELECT PLAYER
+--========================================================
 
 local function selectPlayer(plr)
 
@@ -311,13 +506,17 @@ local function selectPlayer(plr)
 
 	if data.violations > 0 then
 
-		status.Text = "Status: FLAGGED"
+		status.Text =
+			"Status: FLAGGED"
+
 		status.TextColor3 =
 			Color3.fromRGB(255, 75, 75)
 
 	else
 
-		status.Text = "Status: Normal"
+		status.Text =
+			"Status: Normal"
+
 		status.TextColor3 =
 			Color3.fromRGB(90, 255, 120)
 
@@ -325,7 +524,44 @@ local function selectPlayer(plr)
 end
 
 --========================================================
--- ADD PLAYER TO LIST
+-- FLAG PLAYER
+--========================================================
+
+local function flagPlayer(plr, violation)
+
+	if not playerData[plr] then
+		return
+	end
+
+	playerData[plr].violations += 1
+	playerData[plr].reason = violation
+
+	local button = playerButtons[plr]
+
+	if button then
+
+		button.BackgroundColor3 =
+			Color3.fromRGB(80, 35, 40)
+
+	end
+
+	if selectedPlayer == plr then
+		selectPlayer(plr)
+	end
+
+	-- ONE notification per player
+	showCheaterNotification(plr)
+
+	warn(
+		"[MOD CHECKER] "
+			.. plr.Name
+			.. " - "
+			.. violation
+	)
+end
+
+--========================================================
+-- ADD PLAYER
 --========================================================
 
 local function addPlayer(plr)
@@ -342,22 +578,33 @@ local function addPlayer(plr)
 	local button = Instance.new("TextButton")
 
 	button.Name = plr.Name
-	button.Size = UDim2.new(1, 0, 0, 48)
+
+	button.Size = UDim2.new(
+		1,
+		0,
+		0,
+		isMobile and 38 or 48
+	)
+
 	button.BackgroundColor3 =
 		Color3.fromRGB(42, 42, 53)
 
 	button.BorderSizePixel = 0
 	button.Text = plr.DisplayName
 	button.TextColor3 = Color3.new(1, 1, 1)
-	button.TextSize = 15
+	button.TextSize = isMobile and 11 or 15
 	button.Font = Enum.Font.Gotham
 	button.TextXAlignment = Enum.TextXAlignment.Left
+	button.TextTruncate = Enum.TextTruncate.AtEnd
 	button.AutoButtonColor = true
 	button.Parent = playerList
 
-	local buttonPadding = Instance.new("UIPadding")
-	buttonPadding.PaddingLeft = UDim.new(0, 12)
-	buttonPadding.Parent = button
+	local padding = Instance.new("UIPadding")
+
+	padding.PaddingLeft =
+		UDim.new(0, isMobile and 8 or 12)
+
+	padding.Parent = button
 
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, 7)
@@ -383,116 +630,76 @@ local function removePlayer(plr)
 
 	playerData[plr] = nil
 
+	-- Allow a notification again if they rejoin
+	notifiedPlayers[plr] = nil
+
 	if selectedPlayer == plr then
 
 		selectedPlayer = nil
 
-		selectedName.Text = "Select a player"
-		status.Text = "Status: Normal"
-		violationText.Text = "Violations: 0"
-		reasonText.Text = "Detected violation: None"
+		selectedName.Text =
+			"Select a player"
+
+		status.Text =
+			"Status: Normal"
+
+		violationText.Text =
+			"Violations: 0"
+
+		reasonText.Text =
+			"Detected violation: None"
 
 	end
 end
 
 --========================================================
--- LOAD EXISTING PLAYERS
---========================================================
-
-for _, plr in ipairs(Players:GetPlayers()) do
-
-	if plr ~= LocalPlayer then
-		addPlayer(plr)
-	end
-
-end
-
---========================================================
--- NEW PLAYERS
---========================================================
-
-Players.PlayerAdded:Connect(function(plr)
-
-	if plr ~= LocalPlayer then
-		addPlayer(plr)
-	end
-
-end)
-
---========================================================
--- PLAYER LEAVES
---========================================================
-
-Players.PlayerRemoving:Connect(function(plr)
-	removePlayer(plr)
-end)
-
---========================================================
--- TEST DETECTION FUNCTION
---========================================================
-
-local function flagPlayer(plr, violation)
-
-	if not playerData[plr] then
-		return
-	end
-
-	playerData[plr].violations += 1
-	playerData[plr].reason = violation
-
-	local button = playerButtons[plr]
-
-	if button then
-		button.BackgroundColor3 =
-			Color3.fromRGB(80, 35, 40)
-	end
-
-	if selectedPlayer == plr then
-		selectPlayer(plr)
-	end
-
-	warn(
-		"[MOD CHECKER] "
-			.. plr.Name
-			.. " - "
-			.. violation
-	)
-end
-
---========================================================
--- BASIC MONITOR
+-- MOVEMENT MONITOR
 --========================================================
 
 local function monitor(plr, character)
 
 	local humanoid =
-		character:WaitForChild("Humanoid", 5)
+		character:WaitForChild(
+			"Humanoid",
+			5
+		)
 
 	local root =
-		character:WaitForChild("HumanoidRootPart", 5)
+		character:WaitForChild(
+			"HumanoidRootPart",
+			5
+		)
 
 	if not humanoid or not root then
 		return
 	end
 
-	local lastPosition = root.Position
+	local lastPosition =
+		root.Position
 
 	while character.Parent and plr.Parent do
 
 		task.wait(0.5)
 
 		if humanoid.Health <= 0 then
-			lastPosition = root.Position
+
+			lastPosition =
+				root.Position
+
 			continue
 		end
 
+		-- WalkSpeed
 		if humanoid.WalkSpeed > 24 then
+
 			flagPlayer(
 				plr,
 				"Abnormally high WalkSpeed"
 			)
+
 		end
 
+		-- JumpPower
 		if humanoid.UseJumpPower
 			and humanoid.JumpPower > 65 then
 
@@ -503,7 +710,9 @@ local function monitor(plr, character)
 
 		end
 
-		local currentPosition = root.Position
+		-- Movement
+		local currentPosition =
+			root.Position
 
 		local difference =
 			currentPosition - lastPosition
@@ -515,7 +724,8 @@ local function monitor(plr, character)
 				difference.Z
 			).Magnitude
 
-		local speed = horizontal / 0.5
+		local speed =
+			horizontal / 0.5
 
 		if horizontal > 100 then
 
@@ -533,13 +743,13 @@ local function monitor(plr, character)
 
 		end
 
-		lastPosition = currentPosition
-
+		lastPosition =
+			currentPosition
 	end
 end
 
 --========================================================
--- SETUP MONITOR
+-- SETUP PLAYER
 --========================================================
 
 local function setupPlayer(plr)
@@ -547,7 +757,12 @@ local function setupPlayer(plr)
 	if plr.Character then
 
 		task.spawn(function()
-			monitor(plr, plr.Character)
+
+			monitor(
+				plr,
+				plr.Character
+			)
+
 		end)
 
 	end
@@ -555,25 +770,52 @@ local function setupPlayer(plr)
 	plr.CharacterAdded:Connect(function(character)
 
 		task.spawn(function()
-			monitor(plr, character)
+
+			monitor(
+				plr,
+				character
+			)
+
 		end)
 
 	end)
 end
 
+--========================================================
+-- EXISTING PLAYERS
+--========================================================
+
 for _, plr in ipairs(Players:GetPlayers()) do
 
 	if plr ~= LocalPlayer then
-		setupPlayer(plr)
-	end
 
+		addPlayer(plr)
+		setupPlayer(plr)
+
+	end
 end
+
+--========================================================
+-- PLAYER JOIN
+--========================================================
 
 Players.PlayerAdded:Connect(function(plr)
 
 	if plr ~= LocalPlayer then
+
+		addPlayer(plr)
 		setupPlayer(plr)
+
 	end
+end)
+
+--========================================================
+-- PLAYER LEAVE
+--========================================================
+
+Players.PlayerRemoving:Connect(function(plr)
+
+	removePlayer(plr)
 
 end)
 
@@ -585,12 +827,14 @@ report.MouseButton1Click:Connect(function()
 
 	if not selectedPlayer then
 
-		report.Text = "SELECT A PLAYER FIRST"
+		report.Text =
+			"SELECT A PLAYER FIRST"
 
 		task.delay(2, function()
 
 			if report then
-				report.Text = "REPORT PLAYER"
+				report.Text =
+					"REPORT PLAYER"
 			end
 
 		end)
@@ -598,15 +842,14 @@ report.MouseButton1Click:Connect(function()
 		return
 	end
 
-	-- This does NOT automatically submit a Roblox report.
-	-- Roblox controls the official reporting system.
-
-	report.Text = "USE ROBLOX REPORT MENU"
+	report.Text =
+		"USE ROBLOX REPORT MENU"
 
 	task.delay(3, function()
 
 		if report then
-			report.Text = "REPORT PLAYER"
+			report.Text =
+				"REPORT PLAYER"
 		end
 
 	end)
@@ -624,6 +867,7 @@ end)
 print("======================================")
 print("SeamusJukes Mod Checker")
 print("Loaded successfully")
-print("Admin:", LocalPlayer.Name)
+print("Access: Everyone")
+print("Mobile:", isMobile)
 print("Players:", #Players:GetPlayers() - 1)
 print("======================================")
